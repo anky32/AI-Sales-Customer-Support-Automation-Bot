@@ -9,31 +9,41 @@ client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
 
-def generate_email(
-    name,
-    requirement
-):
+def generate_email(name, requirement):
 
     prompt = f"""
-    Generate a professional sales email.
+Write a professional sales email to a potential client.
 
-    Client:
-    {name}
+Client Name: {name}
+Client Requirement: {requirement}
 
-    Requirement:
-    {requirement}
-    """
+The email should:
+- Have a compelling subject line (prefix it with "Subject:")
+- Be warm, professional and concise
+- Highlight how we can solve their requirement
+- Include a clear call to action
+- End with a professional sign-off from "The Sales Team"
+    """.strip()
 
-    response = client.chat.completions.create(
+    try:
 
-        model="llama-3.3-70b-versatile",
+        response = client.chat.completions.create(
 
-        messages=[
-            {
-                "role":"user",
-                "content":prompt
-            }
-        ]
-    )
+            model="groq/compound-mini",
 
-    return response.choices[0].message.content
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an expert sales copywriter. Write persuasive, professional sales emails."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        return response.choices[0].message.content
+
+    except Exception as e:
+        return f"Error generating email: {str(e)}"
